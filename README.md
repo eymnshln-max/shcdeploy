@@ -43,7 +43,7 @@ Recommended settings:
 
 ```text
 Language: Node
-Build Command: npm ci && npm run build
+Build Command: npm ci --include=dev && npm run build
 Start Command: npm start
 Instance Type: Free
 ```
