@@ -29,7 +29,7 @@ export function AppHeader({
   onReset,
 }: AppHeaderProps) {
   return (
-    <header style={{minHeight:52,borderBottom:`1px solid ${C.sep}`,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 16px",paddingTop:"env(safe-area-inset-top)",boxSizing:"border-box",flexShrink:0,background:dark?"rgba(28,28,30,0.9)":"rgba(255,255,255,0.9)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)"}}>
+    <header className="app-header" style={{minHeight:52,borderBottom:`1px solid ${C.sep}`,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 16px",paddingTop:"env(safe-area-inset-top)",boxSizing:"border-box",flexShrink:0,background:dark?"rgba(28,28,30,0.9)":"rgba(255,255,255,0.9)",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)"}}>
       <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0,flex:1}}>
         <button onClick={()=>setDark((v: boolean)=>!v)} style={{width:28,height:28,borderRadius:"50%",border:"none",background:"transparent",color:C.text3,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
           {dark

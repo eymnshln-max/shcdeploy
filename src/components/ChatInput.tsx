@@ -47,7 +47,7 @@ export function ChatInput({
   const showDocumentUpload = !offlineMode && (uiPhase === "doc_upload" || uiPhase === "symptoms");
 
   return (
-    <div style={{paddingTop:8,paddingLeft:16,paddingRight:16,paddingBottom:"max(12px, calc(env(safe-area-inset-bottom) - 6px))",background:C.surface,borderTop:`1px solid ${C.sep}`,flexShrink:0}}>
+    <div className="chat-input-bar" style={{paddingTop:8,paddingLeft:16,paddingRight:16,paddingBottom:"max(12px, calc(env(safe-area-inset-bottom) - 6px))",background:C.surface,borderTop:`1px solid ${C.sep}`,flexShrink:0}}>
       <div style={{display:"flex",gap:8,alignItems:"flex-end",background:C.bg2,borderRadius:22,padding:"8px 8px 8px 16px",transition:"background 0.15s"}}
         onFocusCapture={e=>e.currentTarget.style.background=dark?"#48484a":"#efefef"}
         onBlurCapture={e=>e.currentTarget.style.background=C.bg2}>
