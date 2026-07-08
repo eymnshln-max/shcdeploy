@@ -131,7 +131,12 @@
   }
 
 
+  function shouldShowReportButton() {
+    return new URLSearchParams(window.location.search).get('testPanel') === '1';
+  }
+
   function addReportButton() {
+    if (!shouldShowReportButton()) return;
     if (document.getElementById('__standard_health_report_button__')) return;
     const button = document.createElement('button');
     button.id = '__standard_health_report_button__';

@@ -21,6 +21,7 @@ import { useDocumentAnalysis } from "./features/document-analysis/useDocumentAna
 import type { Lang, MessageRole } from "./types";
 
 const MANUAL_TEST_MODE = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("test") === "1";
+const SHOW_MANUAL_TEST_UI = MANUAL_TEST_MODE && typeof window !== "undefined" && new URLSearchParams(window.location.search).get("testPanel") === "1";
 const TEST_SNAPSHOT_KEY = "standard-health:test-snapshot:v1";
 
 
@@ -320,7 +321,7 @@ export default function App() {
         SF={SF}
         dark={dark}
         setDark={setDark}
-        manualTestMode={MANUAL_TEST_MODE}
+        manualTestMode={SHOW_MANUAL_TEST_UI}
         onlineTestError={onlineTestError}
         onlineMeta={onlineMeta}
         doctorMode={doctorMode}
@@ -391,7 +392,7 @@ export default function App() {
 
       </div>
 
-      <ManualTestOverlay visible={MANUAL_TEST_MODE} onlineTestError={onlineTestError} />
+      <ManualTestOverlay visible={SHOW_MANUAL_TEST_UI} onlineTestError={onlineTestError} />
 
       <GlobalStyles C={C} />
     </div>
