@@ -47,7 +47,7 @@ export function AppHeader({
       </div>
       <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
         {manualTestMode && (
-          <div title={onlineTestError || "Online-only manual test mode"} style={{display:"flex",alignItems:"center",gap:5,padding:"4px 8px",borderRadius:12,background:onlineTestError?"rgba(192,57,43,.14)":onlineMeta.confirmed?"rgba(26,122,60,.14)":"rgba(160,82,45,.14)",color:onlineTestError?"#c0392b":onlineMeta.confirmed?"#1a7a3c":"#a0522d",fontSize:9,fontWeight:600,whiteSpace:"nowrap"}}>
+          <div title={onlineTestError || "Online-only mode"} style={{display:"flex",alignItems:"center",gap:5,padding:"4px 8px",borderRadius:12,background:onlineTestError?"rgba(192,57,43,.14)":onlineMeta.confirmed?"rgba(26,122,60,.14)":"rgba(160,82,45,.14)",color:onlineTestError?"#c0392b":onlineMeta.confirmed?"#1a7a3c":"#a0522d",fontSize:9,fontWeight:600,whiteSpace:"nowrap"}}>
             <span style={{width:5,height:5,borderRadius:"50%",background:"currentColor"}}/>
             {onlineTestError?"TEST STOP":onlineMeta.confirmed?`ONLINE · ${onlineMeta.requestCount}`:"ONLINE TEST"}
           </div>
