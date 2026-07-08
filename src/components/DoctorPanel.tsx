@@ -68,13 +68,13 @@ export function DoctorPanel({
 
   return (
 
-              <div style={{flex:1,width:"100%",maxWidth:900,margin:"0 auto",background:C.bg2,display:"flex",flexDirection:"column",overflow:"hidden",fontSize:11}}>
+              <div className="doctor-panel" style={{flex:1,width:"100%",maxWidth:900,margin:"0 auto",background:C.bg2,display:"flex",flexDirection:"column",overflow:"hidden",fontSize:11}}>
                 <div style={{display:"flex",background:C.surface,borderBottom:`1px solid ${C.sep}`,flexShrink:0}}>
                   {([{id:"result",label:t.tabResult},{id:"diff",label:t.tabDiff},...(!offlineMode?[{id:"system",label:t.tabEngine}]:[])] as { id: PanelTab; label: string }[]).map((tab) =>(
                     <button key={tab.id} onClick={()=>setPanelTab(tab.id)} style={{flex:1,padding:"10px 0",fontSize:10,fontWeight:500,letterSpacing:"-0.01em",border:"none",cursor:"pointer",background:"transparent",color:panelTab===tab.id?C.accent:C.text3,borderBottom:panelTab===tab.id?`1.5px solid ${C.accent}`:"1.5px solid transparent",transition:"all 0.15s",fontFamily:SF}}>{tab.label}</button>
                   ))}
                 </div>
-                <div style={{flex:1,overflowY:"auto",padding:"16px 14px"}}>
+                <div className="doctor-scroll" style={{flex:1,overflowY:"auto",padding:"16px 14px"}}>
 
                   {panelTab==="result"&&<>
                     {profile&&(

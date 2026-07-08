@@ -314,7 +314,7 @@ export default function App() {
   const SF = APP_FONT_STACK;
 
   return (
-    <div style={{display:"flex",flexDirection:"column",height:"100dvh",background:C.bg,fontFamily:SF,overflow:"hidden",fontSize:13,color:C.text,WebkitFontSmoothing:"antialiased"}}>
+    <div className="app-shell" style={{display:"flex",flexDirection:"column",height:"100dvh",background:C.bg,fontFamily:SF,overflow:"hidden",fontSize:13,color:C.text,WebkitFontSmoothing:"antialiased"}}>
 
       <AppHeader
         C={C}
@@ -330,7 +330,7 @@ export default function App() {
         onReset={doReset}
       />
 
-      <div style={{flex:1,display:"flex",overflow:"hidden"}}>
+      <div className="app-main" style={{flex:1,display:"flex",overflow:"hidden"}}>
 
         <ChatWorkspace
           C={C}

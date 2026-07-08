@@ -95,9 +95,10 @@ export function ChatWorkspace({
     !offlineMode;
 
   return (
-    <div style={{flex:1,display:doctorMode?"none":"flex",flexDirection:"column",overflow:"hidden",minWidth:0,background:C.bg}}>
+    <div className="chat-workspace" style={{flex:1,display:doctorMode?"none":"flex",flexDirection:"column",overflow:"hidden",minWidth:0,background:C.bg}}>
       <div
         ref={scrollRef}
+        className="chat-scroll"
         style={{flex:1,overflowY:"auto",padding:offlineMode?"24px 0 calc(env(safe-area-inset-bottom) + 20px)":"24px 0 12px",display:"flex",flexDirection:"column",gap:2,userSelect:"none"}}
         onClick={e=>{
           if(uiPhase!=="profiling" && textareaRef.current && e.target===e.currentTarget){

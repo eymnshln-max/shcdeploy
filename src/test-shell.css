@@ -7,3 +7,48 @@ html, body {
   overflow: hidden;
   background: #fff;
 }
+
+@media (orientation: landscape) and (max-height: 520px) {
+  html,
+  body,
+  #root {
+    height: auto;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .app-shell {
+    height: auto !important;
+    min-height: 100dvh;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  .app-main {
+    flex: none !important;
+    min-height: calc(100dvh - 52px);
+    overflow: visible !important;
+  }
+
+  .chat-workspace,
+  .doctor-panel {
+    min-height: calc(100dvh - 52px);
+  }
+
+  .chat-scroll,
+  .doctor-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  .onboarding-shell {
+    height: auto !important;
+    min-height: 100dvh !important;
+    justify-content: flex-start !important;
+    overflow-y: auto !important;
+    padding-top: max(20px, env(safe-area-inset-top)) !important;
+    padding-bottom: max(20px, env(safe-area-inset-bottom)) !important;
+  }
+}
