@@ -138,6 +138,7 @@ export function ChatWorkspace({
           handleAkinatorAnswer={handleAkinatorAnswer}
         />
         {loading&&<LoadingBubble C={C} dark={dark}/>}
+        <div className="landscape-action-spacer" aria-hidden="true" />
         <div ref={bottomRef}/>
       </div>
 

@@ -48,8 +48,16 @@ html, body {
     overflow-y: auto !important;
     padding-left: max(0px, env(safe-area-inset-left)) !important;
     padding-right: max(0px, env(safe-area-inset-right)) !important;
+    padding-bottom: max(96px, calc(env(safe-area-inset-bottom) + 72px)) !important;
+    scroll-padding-bottom: max(96px, calc(env(safe-area-inset-bottom) + 72px));
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
+    touch-action: pan-y;
+  }
+
+  .landscape-action-spacer {
+    display: block;
+    flex: 0 0 max(72px, calc(env(safe-area-inset-bottom) + 56px));
   }
 
   .chat-input-bar {
@@ -60,16 +68,21 @@ html, body {
   .onboarding-shell {
     height: 100dvh !important;
     min-height: 100dvh !important;
-    justify-content: safe center !important;
+    justify-content: flex-start !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    padding-top: max(20px, env(safe-area-inset-top)) !important;
-    padding-bottom: max(20px, env(safe-area-inset-bottom)) !important;
+    padding-top: max(28px, env(safe-area-inset-top)) !important;
+    padding-bottom: max(44px, env(safe-area-inset-bottom)) !important;
     padding-left: max(20px, env(safe-area-inset-left)) !important;
     padding-right: max(20px, env(safe-area-inset-right)) !important;
+    scroll-padding-top: max(28px, env(safe-area-inset-top));
+    scroll-padding-bottom: max(44px, env(safe-area-inset-bottom));
+    touch-action: pan-y;
   }
 
   .onboarding-card {
+    margin-top: auto !important;
+    margin-bottom: auto !important;
     max-width: min(330px, calc(100vw - env(safe-area-inset-left) - env(safe-area-inset-right) - 40px)) !important;
   }
 
