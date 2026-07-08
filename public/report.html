@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Standard Health — Vaka Raporu</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0b0d10; --panel:#14181d; --muted:#9aa4af; --line:#2a313a; --text:#f4f7fa; --ok:#70d69c; --warn:#f3c96b; --bad:#ff8585; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif; }
+    main { max-width:1180px; margin:0 auto; padding:24px 18px 60px; }
+    h1,h2,h3 { line-height:1.2; }
+    h1 { margin:0 0 6px; font-size:28px; }
+    h2 { margin:0 0 16px; font-size:20px; }
+    .muted { color:var(--muted); }
+    .topbar { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; margin-bottom:20px; }
+    .actions { display:flex; flex-wrap:wrap; gap:8px; }
+    button,.button { border:1px solid var(--line); background:#20262d; color:var(--text); border-radius:10px; padding:10px 14px; cursor:pointer; text-decoration:none; font:inherit; }
+    button.primary { background:#f4f7fa; color:#101318; border-color:#f4f7fa; font-weight:700; }
+    button:hover,.button:hover { filter:brightness(1.1); }
+    .grid { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:14px; }
+    .panel { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:18px; }
+    .summary { grid-column:span 12; }
+    .form { grid-column:span 8; }
+    .saved { grid-column:span 4; }
+    .metric-grid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:10px; }
+    .metric { background:#0f1216; border:1px solid var(--line); border-radius:12px; padding:12px; }
+    .metric b { display:block; font-size:21px; margin-top:2px; }
+    fieldset { border:0; padding:0; margin:0 0 22px; }
+    legend { font-weight:800; font-size:17px; margin-bottom:12px; }
+    .fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    label { display:block; font-weight:650; }
+    label span { display:block; color:var(--muted); font-weight:400; font-size:12px; margin:2px 0 6px; }
+    input,textarea,select { width:100%; border:1px solid var(--line); background:#0d1014; color:var(--text); border-radius:10px; padding:10px 11px; font:inherit; }
+    textarea { min-height:110px; resize:vertical; }
+    .wide { grid-column:1 / -1; }
+    .checkbox { display:flex; align-items:center; gap:9px; font-weight:650; }
+    .checkbox input { width:auto; }
+    .report-card { border:1px solid var(--line); background:#0f1216; border-radius:12px; padding:13px; margin-bottom:10px; }
+    .report-card strong { display:block; }
+    .tag { display:inline-block; border:1px solid var(--line); border-radius:999px; padding:2px 8px; margin:6px 4px 0 0; font-size:12px; }
+    .pass { color:var(--ok); } .warning { color:var(--warn); } .fail { color:var(--bad); }
+    .result { margin-top:18px; display:none; }
+    .three { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+    ul { margin:8px 0 0; padding-left:20px; }
+    table { width:100%; border-collapse:collapse; margin-top:12px; }
+    th,td { text-align:left; border-bottom:1px solid var(--line); padding:9px 7px; vertical-align:top; }
+    th { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.05em; }
+    .status { font-weight:800; }
+    .error { color:var(--bad); white-space:pre-wrap; }
+    @media (max-width:900px) { .form,.saved { grid-column:span 12; } .metric-grid { grid-template-columns:repeat(3,1fr); } }
+    @media (max-width:600px) { .topbar { display:block; } .actions { margin-top:12px; } .fields,.three { grid-template-columns:1fr; } .metric-grid { grid-template-columns:repeat(2,1fr); } }
+  </style>
+</head>
+<body>
+<main>
+  <div class="topbar">
+    <div>
+      <h1>Vaka Sonuç Raporu</h1>
+      <div class="muted">Her vaka bittikten sonra bu form doldurulmadan yeni vakaya geçilmez.</div>
+    </div>
+    <div class="actions">
+      <a class="button" href="/" target="_blank">Uygulamayı aç</a>
+      <a class="button" href="/api/test-reports/export.csv">CSV indir</a>
+      <button id="importSnapshot" type="button">Uygulamadan doldur</button>
+      <button id="refresh" type="button">Raporları yenile</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <section class="panel summary">
+      <h2>Toplam durum</h2>
+      <div id="aggregate" class="metric-grid"></div>
+    </section>
+
+    <section class="panel form">
+      <h2>Yeni vaka raporu</h2>
+      <form id="reportForm">
+        <fieldset>
+          <legend>1. Vaka ve online doğrulama</legend>
+          <div class="fields">
+            <label>Vaka ID <span>Örn. CASE-01-PE</span><input name="caseId" required></label>
+            <label>Vaka no <span>1–10</span><input name="caseNumber" type="number" min="1"></label>
+            <label>Yaş <input name="age" type="number" min="0" max="130"></label>
+            <label>Cinsiyet / profil <input name="sex"></label>
+            <label class="wide">Profil cevapları <span>Onboarding’de seçilen diğer bütün bilgiler</span><textarea name="profileAnswers"></textarea></label>
+            <label class="checkbox"><input name="onlineConfirmed" type="checkbox" required> Online Claude API doğrulandı</label>
+            <label>Online model <input name="onlineModel" placeholder="claude-sonnet-4-6"></label>
+            <label>Online istek sayısı <input name="onlineRequestCount" type="number" min="0"></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>2. Gizli vaka gerçeği</legend>
+          <div class="fields">
+            <label>Hedef hastalık <input name="targetCondition" required></label>
+            <label>Beklenen triyaj <span>RED / YELLOW / GREEN / GREY</span><input name="expectedTriage" placeholder="RED" required></label>
+            <label class="wide">Gizli vaka özeti <span>Başlangıç, seyir, riskler, pozitif ve önemli negatif bulgular</span><textarea name="hiddenCaseSummary" required></textarea></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>3. Semptom çıkarımı</legend>
+          <div class="fields">
+            <label class="wide">Hastanın uygulamaya yazdığı ham cümleler <span>Uygulamadan otomatik alınır; konuşmada gerçekten söylenen klinik cümleler</span><textarea name="patientStatements"></textarea></label>
+            <label class="wide">Benim hastayken söylediğim/girdiğim semptomlar <span>Kanonik liste: bir satıra bir semptom; negatif bulguları absent:fever biçiminde yaz</span><textarea name="patientEnteredSymptoms" required></textarea></label>
+            <label>Alınması gereken semptomlar <span>Uygulamanın konuşmadan çıkarması beklenen kanonik liste</span><textarea name="expectedSymptoms" required></textarea></label>
+            <label>Uygulamanın çıkardığı semptomlar <span>Sonuç ekranında gerçekten görülen kanonik liste</span><textarea name="extractedSymptoms" required></textarea></label>
+            <label class="wide">Semptom eşleştirme notu <span>Aynı anlama gelen farklı ifadeleri neden aynı kanonik adla yazdığını açıkla</span><textarea name="symptomMatchingNotes"></textarea></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>4. Sonuç ve hesaplamalar</legend>
+          <div class="fields">
+            <label>Gerçekleşen triyaj <span>RED / YELLOW / GREEN / GREY</span><input name="actualTriage" placeholder="RED" required></label>
+            <label>Hedef tanının sırası <span>Gösterilmediyse boş bırak</span><input name="targetDiagnosisRank" type="number" min="1"></label>
+            <label class="checkbox"><input name="dangerousUnderTriage" type="checkbox"> Tehlikeli düşük triyaj yapıldı</label>
+            <label>Konuşma turu <input name="conversationTurns" type="number" min="0"></label>
+            <label class="wide">Ayırıcı tanılar <span>Bir satıra bir tanı; sıra ve yüzdeyi olduğu gibi ekle</span><textarea name="actualDifferential"></textarea></label>
+            <label class="wide">Sonuç ekranındaki hesaplamalar <span>Yüzdeler, risk/escalation, skorlar, formüller ve dikkat çeken hesap hataları</span><textarea name="calculationOutput"></textarea></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>5. Hata analizi</legend>
+          <div class="fields">
+            <label>Uydurulan / yanlış gerçekler <textarea name="hallucinatedFacts"></textarea></label>
+            <label>Kaçırılan kritik sorular <textarea name="missedCriticalQuestions"></textarea></label>
+            <label>Tekrarlanan sorular <textarea name="repeatedQuestions"></textarea></label>
+            <label>Çelişkiler <textarea name="contradictions"></textarea></label>
+            <label class="wide">UI / state sorunları <textarea name="uiStateProblems"></textarea></label>
+            <label class="wide">Tam konuşma dökümü <textarea name="transcript"></textarea></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>6. Bağımsız değerlendirme</legend>
+          <div class="fields">
+            <label class="wide">Final değerlendirme <span>Neyi doğru yaptı, neyi yanlış yaptı, klinik ve teknik anlamı ne?</span><textarea name="evaluation" required></textarea></label>
+            <label>Final karar <span>Boş bırakırsan hesaplanan öneri kullanılır</span>
+              <select name="finalVerdict">
+                <option value="">Otomatik öneriyi kullan</option>
+                <option>PASS</option>
+                <option>PASS WITH WARNINGS</option>
+                <option>FAIL</option>
+                <option>INVALID</option>
+              </select>
+            </label>
+          </div>
+        </fieldset>
+
+        <button class="primary" type="submit">Raporu hesapla ve kaydet</button>
+        <div id="formError" class="error"></div>
+      </form>
+
+      <section id="result" class="panel result"></section>
+    </section>
+
+    <aside class="panel saved">
+      <h2>Kaydedilen vakalar</h2>
+      <div id="savedReports" class="muted">Henüz rapor yok.</div>
+    </aside>
+  </div>
+</main>
+<script>
+  const form = document.getElementById('reportForm');
+  const aggregateEl = document.getElementById('aggregate');
+  const savedEl = document.getElementById('savedReports');
+  const resultEl = document.getElementById('result');
+  const errorEl = document.getElementById('formError');
+
+  document.getElementById('refresh').addEventListener('click', loadReports);
+  document.getElementById('importSnapshot').addEventListener('click', () => importSnapshot(true));
+  form.addEventListener('submit', saveReport);
+  restoreDraft();
+  form.addEventListener('input', saveDraft);
+  loadHealth();
+  importSnapshot(false);
+  loadReports();
+
+
+  function importSnapshot(showMessage) {
+    errorEl.textContent = '';
+    try {
+      const raw = localStorage.getItem('standard-health:test-snapshot:v1');
+      if (!raw) {
+        if (showMessage) errorEl.textContent = "Uygulama snapshot'ı bulunamadı. Önce uygulamada bir vakayı ilerletin.";
+        return;
+      }
+      const s = JSON.parse(raw);
+      setField('age', s.profile?.age ?? '');
+      setField('sex', s.profile?.sex ?? '');
+      setField('profileAnswers', formatProfile(s.profileAnswers, s.profile));
+      form.elements.onlineConfirmed.checked = s.onlineConfirmed === true && s.fallbackUsed !== true && !s.onlineTestError;
+      setField('onlineModel', s.onlineModel || '');
+      setField('onlineRequestCount', s.onlineRequestCount ?? '');
+      setField('patientStatements', (s.patientClinicalStatements || []).join('\n'));
+      setField('extractedSymptoms', (s.extractedSymptomsCanonical || []).join('\n'));
+      setField('actualTriage', s.routing || '');
+      setField('conversationTurns', s.conversationTurns ?? '');
+      setField('actualDifferential', (s.differentials || []).map((d, i) => `${i + 1}. ${d.name || d.condition || '—'}${d.icd ? ` [${d.icd}]` : ''}${d.pct != null ? ` — ${d.pct}%` : ''}`).join('\n'));
+      setField('calculationOutput', formatCalculations(s));
+      setField('transcript', s.transcript || '');
+      if (s.onlineTestError || s.fallbackUsed) {
+        form.elements.onlineConfirmed.checked = false;
+        setField('finalVerdict', 'INVALID');
+        const note = [s.onlineTestError && `Online error: ${s.onlineTestError}`, s.fallbackUsed && 'Offline fallback was used.'].filter(Boolean).join('\n');
+        setField('uiStateProblems', note);
+      }
+      saveDraft();
+      if (showMessage) errorEl.textContent = 'Uygulamadaki güncel vaka verileri forma aktarıldı. Gizli vaka ve beklenen semptomları bağımsız olarak tamamlayın.';
+    } catch (error) {
+      errorEl.textContent = `Snapshot okunamadı: ${error.message}`;
+    }
+  }
+
+  function setField(name, value) {
+    const el = form.elements[name];
+    if (!el || value == null) return;
+    el.value = value;
+  }
+
+  function formatProfile(answers, profile) {
+    const lines = [];
+    if (answers && typeof answers === 'object') {
+      for (const [key, value] of Object.entries(answers)) lines.push(`${key}: ${value}`);
+    }
+    if (profile?.bmi != null) lines.push(`calculated_bmi: ${Number(profile.bmi).toFixed(1)}`);
+    return lines.join('\n');
+  }
+
+  function formatCalculations(s) {
+    const lines = [
+      `routing: ${s.routing || '—'}`,
+      `urgency: ${s.urgency || '—'}`,
+      `lambda: ${s.lambda ?? '—'}`,
+      `abstention: ${JSON.stringify(s.abstention || {})}`,
+    ];
+    if (s.sprt) {
+      lines.push(`SPRT top: ${s.sprt.topKey || '—'}`);
+      lines.push(`SPRT S: ${s.sprt.S ?? '—'}`);
+      lines.push(`SPRT bounds: A=${s.sprt.A ?? '—'}, B=${s.sprt.B ?? '—'}`);
+      lines.push(`SPRT abstained: ${Boolean(s.sprt.abstained)}`);
+      if (Array.isArray(s.sprt.traj)) lines.push(`SPRT trajectory: ${JSON.stringify(s.sprt.traj)}`);
+    }
+    if (Array.isArray(s.matches) && s.matches.length) {
+      lines.push('Pattern matches:');
+      s.matches.forEach((m, i) => lines.push(`${i + 1}. ${m.name} [${m.icd || '—'}] hits=${m.triggerHits ?? '—'} LR=${m.sprt_lr ?? '—'} profileMod=${m.profileMod ?? '—'} confirmatory=${Boolean(m.confirmatoryMet)}`));
+    }
+    if (s.doctorAlert) lines.push(`Doctor alert: ${s.doctorAlert}`);
+    return lines.join('\n');
+  }
+  async function loadHealth() {
+    try {
+      const response = await fetch('/api/health');
+      const data = await response.json();
+      if (data.ok && data.online && data.fallbackUsed === false) {
+        form.elements.onlineConfirmed.checked = true;
+        form.elements.onlineModel.value = data.model || '';
+      }
+    } catch {}
+  }
+
+  async function loadReports() {
+    const response = await fetch('/api/test-reports');
+    const data = await response.json();
+    renderAggregate(data.aggregate || {});
+    renderSaved(data.reports || []);
+  }
+
+  async function saveReport(event) {
+    event.preventDefault();
+    errorEl.textContent = '';
+    const payload = formToObject(new FormData(form));
+    try {
+      const response = await fetch('/api/test-reports', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)
+      });
+      const data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data?.error?.message || 'Rapor kaydedilemedi.');
+      renderResult(data.report);
+      renderAggregate(data.aggregate || {});
+      localStorage.removeItem('standard-health-report-draft');
+      await loadReports();
+      window.scrollTo({ top: resultEl.offsetTop - 20, behavior:'smooth' });
+    } catch (error) {
+      errorEl.textContent = error.message;
+    }
+  }
+
+  function formToObject(fd) {
+    const listFields = new Set(['patientStatements','patientEnteredSymptoms','expectedSymptoms','extractedSymptoms','actualDifferential','hallucinatedFacts','missedCriticalQuestions','repeatedQuestions','contradictions','uiStateProblems']);
+    const numberFields = new Set(['caseNumber','age','onlineRequestCount','targetDiagnosisRank','conversationTurns']);
+    const obj = {};
+    for (const [key,value] of fd.entries()) {
+      if (listFields.has(key)) obj[key] = lines(value);
+      else if (numberFields.has(key)) obj[key] = value === '' ? null : Number(value);
+      else obj[key] = value;
+    }
+    obj.onlineConfirmed = form.elements.onlineConfirmed.checked;
+    obj.dangerousUnderTriage = form.elements.dangerousUnderTriage.checked;
+    return obj;
+  }
+
+  function lines(value) { return String(value).split(/\r?\n/).map(v => v.trim()).filter(Boolean); }
+
+  function renderAggregate(a) {
+    const items = [
+      ['Toplam vaka', a.totalCases || 0], ['Geçerli vaka', a.validCases || 0],
+      ['Triyaj doğruluğu', pct(a.triageAccuracy)], ['Düşük triyaj', a.underTriageCount || 0], ['Yüksek triyaj', a.overTriageCount || 0],
+      ['Tehlikeli düşük triyaj', a.dangerousUnderTriageCount || 0], ['Semptom precision', pct(a.symptomMicroPrecision)],
+      ['Semptom recall', pct(a.symptomMicroRecall)], ['Semptom F1', pct(a.symptomMicroF1)]
+    ];
+    aggregateEl.replaceChildren(...items.map(([label,value]) => metric(label,value)));
+  }
+
+  function metric(label,value) {
+    const div = document.createElement('div'); div.className='metric';
+    const small=document.createElement('div'); small.className='muted'; small.textContent=label;
+    const b=document.createElement('b'); b.textContent=value;
+    div.append(small,b); return div;
+  }
+
+  function renderSaved(reports) {
+    savedEl.innerHTML='';
+    if (!reports.length) { savedEl.textContent='Henüz rapor yok.'; return; }
+    [...reports].reverse().forEach(report => {
+      const card=document.createElement('div'); card.className='report-card';
+      const title=document.createElement('strong'); title.textContent=`${report.caseId} — ${report.targetCondition}`;
+      const meta=document.createElement('div'); meta.className='muted'; meta.textContent=`Triyaj: ${report.expectedTriage} → ${report.actualTriage} · F1 ${pct(report.symptomMetrics?.f1)}`;
+      const tag=document.createElement('span'); tag.className=`tag ${verdictClass(report.finalVerdict)}`; tag.textContent=report.finalVerdict;
+      card.append(title,meta,tag); savedEl.append(card);
+    });
+  }
+
+  function renderResult(r) {
+    resultEl.style.display='block'; resultEl.innerHTML='';
+    const h=document.createElement('h2'); h.textContent=`${r.caseId} — Final Rapor`;
+    const verdict=document.createElement('p'); verdict.className=`status ${verdictClass(r.finalVerdict)}`; verdict.textContent=`${r.finalVerdict} (otomatik öneri: ${r.suggestedVerdict})`;
+    const metrics=document.createElement('div'); metrics.className='metric-grid';
+    [['TP',r.symptomMetrics.truePositiveCount],['FP',r.symptomMetrics.falsePositiveCount],['FN',r.symptomMetrics.falseNegativeCount],['Precision',pct(r.symptomMetrics.precision)],['Recall',pct(r.symptomMetrics.recall)],['F1',pct(r.symptomMetrics.f1)]].forEach(([l,v])=>metrics.append(metric(l,v)));
+    const cols=document.createElement('div'); cols.className='three';
+    cols.append(listBlock('Doğru çıkarılanlar',r.symptomMetrics.truePositives,'pass'),listBlock('Kaçırılanlar',r.symptomMetrics.falseNegatives,'fail'),listBlock('Fazladan/yanlış çıkarılanlar',r.symptomMetrics.falsePositives,'warning'));
+    const triage=document.createElement('p'); triage.innerHTML=`<strong>Triyaj:</strong> ${escapeHtml(r.expectedTriage)} → ${escapeHtml(r.actualTriage)} · <span class="${r.triageCorrect?'pass':'fail'}">${r.triageCorrect?'DOĞRU':'YANLIŞ'}</span>${r.underTriage?' · DÜŞÜK TRİYAJ':''}${r.overTriage?' · YÜKSEK TRİYAJ':''}`;
+    const evalTitle=document.createElement('h3'); evalTitle.textContent='Bağımsız değerlendirme';
+    const evaluation=document.createElement('p'); evaluation.style.whiteSpace='pre-wrap'; evaluation.textContent=r.evaluation;
+    resultEl.append(h,verdict,metrics,cols,triage,evalTitle,evaluation);
+  }
+
+  function listBlock(title,items,klass) {
+    const div=document.createElement('div');
+    const h=document.createElement('h3'); h.className=klass; h.textContent=title;
+    const ul=document.createElement('ul');
+    (items.length?items:['—']).forEach(item=>{const li=document.createElement('li');li.textContent=item;ul.append(li)});
+    div.append(h,ul); return div;
+  }
+
+  function pct(value) { return `${Math.round((Number(value)||0)*1000)/10}%`; }
+  function verdictClass(v) { return v==='PASS'?'pass':v==='PASS WITH WARNINGS'?'warning':'fail'; }
+  function escapeHtml(v) { return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])); }
+
+  function saveDraft() {
+    const data={}; new FormData(form).forEach((v,k)=>data[k]=v);
+    data.onlineConfirmed=form.elements.onlineConfirmed.checked;
+    data.dangerousUnderTriage=form.elements.dangerousUnderTriage.checked;
+    localStorage.setItem('standard-health-report-draft',JSON.stringify(data));
+  }
+  function restoreDraft() {
+    try {
+      const data=JSON.parse(localStorage.getItem('standard-health-report-draft')||'null');
+      if (!data) return;
+      Object.entries(data).forEach(([k,v])=>{ if(form.elements[k]) { if(form.elements[k].type==='checkbox') form.elements[k].checked=Boolean(v); else form.elements[k].value=v; }});
+    } catch {}
+  }
+</script>
+</body>
+</html>
