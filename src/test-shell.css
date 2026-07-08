@@ -48,16 +48,11 @@ html, body {
     overflow-y: auto !important;
     padding-left: max(0px, env(safe-area-inset-left)) !important;
     padding-right: max(0px, env(safe-area-inset-right)) !important;
-    padding-bottom: max(96px, calc(env(safe-area-inset-bottom) + 72px)) !important;
-    scroll-padding-bottom: max(96px, calc(env(safe-area-inset-bottom) + 72px));
+    padding-bottom: max(64px, calc(env(safe-area-inset-bottom) + 48px)) !important;
+    scroll-padding-bottom: max(64px, calc(env(safe-area-inset-bottom) + 48px));
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
     touch-action: pan-y;
-  }
-
-  .landscape-action-spacer {
-    display: block;
-    flex: 0 0 max(72px, calc(env(safe-area-inset-bottom) + 56px));
   }
 
   .chat-input-bar {
