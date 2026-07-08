@@ -135,6 +135,9 @@ export default function App() {
     akinatorGate,
     akinatorDone,
     routing,
+    profileIdx,
+    uiPhase,
+    followUpCount: followUpHistory.length,
   });
   useAppTheme(dark);
   useManualTestSnapshot({
