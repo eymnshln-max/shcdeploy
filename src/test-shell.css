@@ -33,7 +33,7 @@ html, body {
   }
 
   .onboarding-card {
-    transform: translateY(10px);
+    transform: translateY(64px);
   }
 }
 
