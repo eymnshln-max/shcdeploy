@@ -21,8 +21,18 @@ function resetPageScroll() {
   document.body.scrollTop = 0;
 }
 
+function syncVisualViewportHeight() {
+  const height = window.visualViewport?.height ?? window.innerHeight;
+  document.documentElement.style.setProperty("--shc-viewport-height", `${height}px`);
+}
+
 function isShortLandscape() {
   return window.matchMedia("(orientation: landscape) and (max-height: 520px)").matches;
+}
+
+function isTextInputActive() {
+  const active = document.activeElement;
+  return active instanceof HTMLTextAreaElement || active instanceof HTMLInputElement;
 }
 
 export function useAutoScroll({
@@ -57,23 +67,43 @@ export function useAutoScroll({
     const sc = scrollRef.current;
     if (!sc) return;
 
+    syncVisualViewportHeight();
+
     const handleViewportChange = () => {
+      syncVisualViewportHeight();
       resetPageScroll();
-      if (isShortLandscape()) {
+      if (isShortLandscape() || isTextInputActive()) {
         requestAnimationFrame(() => {
           sc.scrollTo({ top: sc.scrollHeight, behavior: "smooth" });
         });
       }
     };
 
+    const handleTextFocus = () => {
+      syncVisualViewportHeight();
+      resetPageScroll();
+
+      for (const delay of [0, 80, 220]) {
+        window.setTimeout(() => {
+          syncVisualViewportHeight();
+          sc.scrollTo({ top: sc.scrollHeight, behavior: "smooth" });
+        }, delay);
+      }
+    };
+
     window.addEventListener("orientationchange", handleViewportChange);
     window.addEventListener("resize", handleViewportChange);
+    window.addEventListener("focusin", handleTextFocus);
     window.visualViewport?.addEventListener("resize", handleViewportChange);
+    window.visualViewport?.addEventListener("scroll", handleViewportChange);
 
     return () => {
+      document.documentElement.style.removeProperty("--shc-viewport-height");
       window.removeEventListener("orientationchange", handleViewportChange);
       window.removeEventListener("resize", handleViewportChange);
+      window.removeEventListener("focusin", handleTextFocus);
       window.visualViewport?.removeEventListener("resize", handleViewportChange);
+      window.visualViewport?.removeEventListener("scroll", handleViewportChange);
     };
   }, [enabled, scrollRef]);
 }

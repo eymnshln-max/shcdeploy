@@ -3,6 +3,19 @@ html, body, #root {
   min-height: 100%;
   margin: 0;
 }
+
+:root {
+  --shc-viewport-height: 100dvh;
+}
+
+.app-shell {
+  height: var(--shc-viewport-height, 100dvh) !important;
+}
+
+.app-main {
+  min-height: 0;
+}
+
 html, body {
   overflow: hidden;
   background: #fff;
@@ -20,15 +33,15 @@ html, body {
   }
 
   .app-shell {
-    height: 100dvh !important;
-    min-height: 100dvh;
+    height: var(--shc-viewport-height, 100dvh) !important;
+    min-height: var(--shc-viewport-height, 100dvh);
     overflow-x: hidden !important;
     overflow-y: hidden !important;
   }
 
   .app-main {
     flex: 1 1 auto !important;
-    min-height: calc(100dvh - 52px);
+    min-height: calc(var(--shc-viewport-height, 100dvh) - 52px);
     overflow: hidden !important;
   }
 
@@ -39,8 +52,8 @@ html, body {
 
   .chat-workspace,
   .doctor-panel {
-    height: calc(100dvh - 52px);
-    min-height: calc(100dvh - 52px);
+    height: calc(var(--shc-viewport-height, 100dvh) - 52px);
+    min-height: calc(var(--shc-viewport-height, 100dvh) - 52px);
   }
 
   .chat-scroll,
