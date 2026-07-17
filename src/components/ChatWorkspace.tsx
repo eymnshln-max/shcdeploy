@@ -99,7 +99,7 @@ export function ChatWorkspace({
       <div
         ref={scrollRef}
         className="chat-scroll"
-        style={{flex:1,overflowY:"auto",padding:offlineMode?"24px 0 calc(env(safe-area-inset-bottom) + 20px)":"24px 0 12px",display:"flex",flexDirection:"column",gap:2,userSelect:"none"}}
+        style={{flex:1,overflowY:"auto",padding:offlineMode||uiPhase==="profiling"?"24px 0 calc(env(safe-area-inset-bottom) + 20px)":"24px 0 12px",display:"flex",flexDirection:"column",gap:2,userSelect:"none"}}
         onClick={e=>{
           if(uiPhase!=="profiling" && textareaRef.current && e.target===e.currentTarget){
             textareaRef.current.focus();
