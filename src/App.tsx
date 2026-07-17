@@ -22,6 +22,7 @@ import type { Lang, MessageRole } from "./types";
 
 const MANUAL_TEST_MODE = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("test") === "1";
 const SHOW_MANUAL_TEST_UI = MANUAL_TEST_MODE && typeof window !== "undefined" && new URLSearchParams(window.location.search).get("testPanel") === "1";
+const SHOW_MANUAL_TEST_STOP_OVERLAY = false;
 const TEST_SNAPSHOT_KEY = "standard-health:test-snapshot:v1";
 
 
@@ -395,7 +396,7 @@ export default function App() {
 
       </div>
 
-      <ManualTestOverlay visible={SHOW_MANUAL_TEST_UI} onlineTestError={onlineTestError} />
+      <ManualTestOverlay visible={SHOW_MANUAL_TEST_UI && SHOW_MANUAL_TEST_STOP_OVERLAY} onlineTestError={onlineTestError} />
 
       <GlobalStyles C={C} />
     </div>
