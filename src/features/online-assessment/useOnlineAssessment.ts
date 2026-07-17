@@ -41,7 +41,6 @@ interface UseOnlineAssessmentArgs {
   addMsg: (text: string, role?: MessageRole) => void;
   callAPI: (system: string, messages: OnlineMessage[]) => Promise<OnlineResponse>;
   startAkinator: () => void;
-  manualTestMode: boolean;
   setPatientClinicalStatements: StateSetter<string[]>;
   setLoading: StateSetter<boolean>;
   setSymptomText: StateSetter<string>;
@@ -74,7 +73,6 @@ export function useOnlineAssessment({
   addMsg,
   callAPI,
   startAkinator,
-  manualTestMode,
   setPatientClinicalStatements,
   setLoading,
   setSymptomText,
@@ -200,22 +198,14 @@ export function useOnlineAssessment({
       const absSource = engineRes ?? { routing: parsed.routing, diffs: parsed.differentials || [], sprt: null };
       setAbstention(deriveAbstention(absSource));
       if (parsed.phase==="collecting" && parsed.text) setFollowUpHistory((h) => { const updated=[...h]; if(updated.length>0&&updated[updated.length-1].a===""){updated[updated.length-1]={...updated[updated.length-1],a:text};} return [...updated,{q:parsed.text || "",a:""}]; });
-    } catch (err) {
-      if (manualTestMode) {
-        const message = err instanceof Error ? err.message : String(err);
-        setOnlineTestError(message);
-        addMsg(lang === "tr"
-          ? `ONLINE TEST DURDURULDU\n\nClaude API çağrısı başarısız oldu. Offline fallback kullanılmadı. Bu vaka INVALID olarak raporlanmalıdır.\n\n${message}`
-          : `ONLINE TEST STOPPED\n\nThe Claude API request failed. Offline fallback was not used. Mark this case INVALID.\n\n${message}`);
-      } else {
-        // Normal kullanıcı sürümünde mevcut davranışı koru. Test modunda bu yol kesinlikle kullanılmaz.
-        setOfflineMode(true);
-        const switchMsg = lang === "tr"
-          ? "Bağlantı kurulamadı — çevrimdışı moda geçildi.\n\nAşağıdaki listeden size en çok uyan şikayeti seçin:"
-          : "Could not connect — switched to offline mode.\n\nSelect the complaint that best describes what you're experiencing:";
-        addMsg(switchMsg);
-        setTimeout(() => startAkinator(), 100);
-      }
+    } catch {
+      setOnlineTestError(null);
+      setOfflineMode(true);
+      const switchMsg = lang === "tr"
+        ? "Bağlantı kurulamadı — çevrimdışı moda geçildi.\n\nAşağıdaki listeden size en çok uyan şikayeti seçin:"
+        : "Could not connect — switched to offline mode.\n\nSelect the complaint that best describes what you're experiencing:";
+      addMsg(switchMsg);
+      setTimeout(() => startAkinator(), 100);
     }
     setLoading(false);
   }

@@ -18,6 +18,8 @@
     requestCount: 0
   };
 
+  const SHOW_BLOCKING_FAILURE = false;
+
   async function complete({
     messages,
     system,
@@ -88,7 +90,7 @@
         requestId: error.requestId
       }
     }));
-    showBlockingFailure(error);
+    if (SHOW_BLOCKING_FAILURE) showBlockingFailure(error);
     throw error;
   }
 

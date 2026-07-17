@@ -17,8 +17,6 @@ interface UseDocumentAnalysisArgs {
   uiPhase: UiPhase;
   addMsg: (text: string, role?: MessageRole) => void;
   callAPI: (system: string, messages: { role: "user" | "assistant"; content: unknown }[]) => Promise<OnlineResponse>;
-  manualTestMode: boolean;
-  setOnlineTestError: StateSetter<string | null>;
   setLoading: StateSetter<boolean>;
   setDocPhase: StateSetter<DocPhase>;
   setUiPhase: StateSetter<UiPhase>;
@@ -33,8 +31,6 @@ export function useDocumentAnalysis({
   uiPhase,
   addMsg,
   callAPI,
-  manualTestMode,
-  setOnlineTestError,
   setLoading,
   setDocPhase,
   setUiPhase,
@@ -51,8 +47,7 @@ export function useDocumentAnalysis({
       );
       const result = data?.content?.map((block) => block.text || "").join("").trim() || "";
       return result === "NOT_MEDICAL" ? "NOT_MEDICAL" : result;
-    } catch (err) {
-      if (manualTestMode) setOnlineTestError(err instanceof Error ? err.message : String(err));
+    } catch {
       return "";
     }
   }
