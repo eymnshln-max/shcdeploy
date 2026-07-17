@@ -21,6 +21,18 @@ html, body {
   background: #fff;
 }
 
+@media (orientation: portrait) {
+  .onboarding-shell {
+    box-sizing: border-box !important;
+    min-height: var(--shc-viewport-height, 100dvh) !important;
+    justify-content: center !important;
+    padding-top: max(24px, calc(env(safe-area-inset-top) + 8px)) !important;
+    padding-right: max(20px, env(safe-area-inset-right)) !important;
+    padding-bottom: max(16px, env(safe-area-inset-bottom)) !important;
+    padding-left: max(20px, env(safe-area-inset-left)) !important;
+  }
+}
+
 @media (orientation: landscape) and (max-height: 520px) {
   html,
   body,
