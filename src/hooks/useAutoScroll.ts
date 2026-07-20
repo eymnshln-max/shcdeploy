@@ -74,7 +74,7 @@ export function useAutoScroll({
       resetPageScroll();
       if (isShortLandscape() || isTextInputActive()) {
         requestAnimationFrame(() => {
-          sc.scrollTo({ top: sc.scrollHeight, behavior: "smooth" });
+          sc.scrollTo({ top: sc.scrollHeight, behavior: "auto" });
         });
       }
     };
@@ -86,7 +86,7 @@ export function useAutoScroll({
       for (const delay of [0, 80, 220]) {
         window.setTimeout(() => {
           syncVisualViewportHeight();
-          sc.scrollTo({ top: sc.scrollHeight, behavior: "smooth" });
+          sc.scrollTo({ top: sc.scrollHeight, behavior: "auto" });
         }, delay);
       }
     };
@@ -95,7 +95,6 @@ export function useAutoScroll({
     window.addEventListener("resize", handleViewportChange);
     window.addEventListener("focusin", handleTextFocus);
     window.visualViewport?.addEventListener("resize", handleViewportChange);
-    window.visualViewport?.addEventListener("scroll", handleViewportChange);
 
     return () => {
       document.documentElement.style.removeProperty("--shc-viewport-height");
@@ -103,7 +102,6 @@ export function useAutoScroll({
       window.removeEventListener("resize", handleViewportChange);
       window.removeEventListener("focusin", handleTextFocus);
       window.visualViewport?.removeEventListener("resize", handleViewportChange);
-      window.visualViewport?.removeEventListener("scroll", handleViewportChange);
     };
   }, [enabled, scrollRef]);
 }
